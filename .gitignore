@@ -3,3 +3,4 @@
 data/
 *.mp4
 scores
+__pycache__
