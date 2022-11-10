@@ -1,3 +1,3 @@
 # Sophia_Reserch
 
-My graduation reserch about generating a baseball digest.
+My graduation reserch about generating a digest video of the baseball game.
