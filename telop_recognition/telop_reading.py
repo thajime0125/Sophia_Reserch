@@ -1,6 +1,7 @@
 import os
 
 import cv2
+import pytesseract
 
 filedir = "data/scores/"
 
@@ -18,6 +19,12 @@ def is_positive_base(img):
         return 0
     else:
         return 1
+
+
+def number_recognition(img):
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    num = pytesseract.image_to_string(img_gray, config='--psm 10')
+    return int(num)
 
 
 def reading_count(img):
@@ -59,7 +66,8 @@ def reading_count(img):
     else:
         out_count = 0
     
-    return ball_count, strike_count, out_count
+    return [ball_count, strike_count, out_count]
+
 
 def reading_base(img):
 
@@ -70,9 +78,11 @@ def reading_base(img):
     base_1 = img[54:61, 309:316]
     if is_positive_base(base_1):
         base[0] = 1
+    # reading 2nd_base
     base_2 = img[27:34, 283:290]
     if is_positive_base(base_2):
         base[1] = 1
+    # reading 3rd_base
     base_3 = img[54:61, 256:263]
     if is_positive_base(base_3):
         base[2] = 1
@@ -80,13 +90,30 @@ def reading_base(img):
     return base
 
 
+def reading_score(img):
+
+    score_1_img = img[44:65, 172:186]
+    score_1 = number_recognition(score_1_img)
+    score_2_img = img[71:, 172:186]
+    score_2 = number_recognition(score_2_img)
+
+    return [score_1, score_2]
+
+
+def reading_inning(img):
+    inning_num = number_recognition(img[48:74, 272:288])
+    return inning_num
+
+
 if __name__ == '__main__':
-    n = 163080
+    n = 239460
     filepath = f'{filedir}score{n}.jpg'
     img = cv2.imread(filepath)
     
-    # b, s, o = reading_count(img)
-    # print(b, s, o)
-
+    count = reading_count(img)
     base = reading_base(img)
-    print(base)
+    score = reading_score(img)
+    inning = reading_inning(img)
+
+    print(f'count: {count}\nbase: {base}\nscore: {score}\ninning: {inning}')
+
