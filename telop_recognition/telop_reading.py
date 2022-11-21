@@ -1,4 +1,5 @@
 import os
+import re
 
 import cv2
 import pytesseract
@@ -24,6 +25,7 @@ def is_positive_base(img):
 def number_recognition(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     num = pytesseract.image_to_string(img_gray, config='--psm 10')
+    num = re.sub(r"[^0-9]", "", num)
     return int(num)
 
 
