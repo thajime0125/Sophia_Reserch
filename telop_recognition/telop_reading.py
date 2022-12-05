@@ -94,9 +94,9 @@ def reading_base(img):
 
 def reading_score(img):
 
-    score_1_img = img[44:65, 172:186]
+    score_1_img = img[42:68, 168:189]
     score_1 = number_recognition(score_1_img)
-    score_2_img = img[71:, 172:186]
+    score_2_img = img[70:, 168:189]
     score_2 = number_recognition(score_2_img)
 
     return [score_1, score_2]

@@ -24,22 +24,29 @@ def telop_recognition():
     total_frame = int(movie.get(cv2.CAP_PROP_FRAME_COUNT))
     i = 0
     while True:
-        ret, frame = movie.read()
-        if i % 30 == 0:
-            telop = frame[
-                TELOP_POSITION["y"]:TELOP_POSITION["y"] + TELOP_POSITION["height"], 
-                TELOP_POSITION["x"]:TELOP_POSITION["x"] + TELOP_POSITION["width"]
-                ]
-            telop_diff = cv2.absdiff(telop, telop_tar)
-            if telop_diff.mean() < 30:
-                count = reading_count(telop)
-                base = reading_base(telop)
-                score = reading_score(telop)
-                inning = reading_inning(telop)
-                telop_info.append([i, inning, base, count, score])
+        try:
+            ret, frame = movie.read()
+            if i % 30 == 0:
+                telop = frame[
+                    TELOP_POSITION["y"]:TELOP_POSITION["y"] + TELOP_POSITION["height"], 
+                    TELOP_POSITION["x"]:TELOP_POSITION["x"] + TELOP_POSITION["width"]
+                    ]
+                telop_diff = cv2.absdiff(telop, telop_tar)
+                if telop_diff.mean() < 30:
+                    count = reading_count(telop)
+                    base = reading_base(telop)
+                    score = reading_score(telop)
+                    inning = reading_inning(telop)
+                    telop_info.append([i, inning, base, count, score])
+        except:
+            pass
+                
         i += 1
         if i == total_frame:
-            break
+                break
+        if i % 1000 == 0:
+            print(i)
+
     telop_info = pd.DataFrame(telop_info, columns=["frame", "inning", "base", "count", "score"])
 
     return telop_info
