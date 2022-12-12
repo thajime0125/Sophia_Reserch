@@ -18,7 +18,7 @@ def define_highlight(df):
             if now_score == "[0, 0]": # first point
                 highlight_point.loc[index-1, "point"] += 3
             if row["base"] == "[0, 0, 0]": # homerun
-                highlight_point.loc[index-1, "point"] += 2
+                highlight_point.loc[index-1, "point"] += 3
             now_score = row["score"]
             highlight_point.loc[index-1, "point"] += 1
 
@@ -41,10 +41,18 @@ def indexing_frame(df):
     indexing_df = pd.DataFrame()
     for _, row in df.iterrows():
         now_frame = row.to_list()
-        if now_frame[1:] != before_frame[1:]:
+        batter_change = False
+        if eval(now_frame[3])[2] != eval(before_frame[3])[2]:
+            batter_change = True
+        elif now_frame[2] != before_frame[2]:
+            batter_change = True
+        elif now_frame[4] != before_frame[4]:
+            batter_change = True
+        if batter_change:
             before_frame = now_frame
             indexing_df = indexing_df.append(
-                row, ignore_index=True, sort=False)
+                before_row, ignore_index=True, sort=False)
+        before_row = row
     indexing_df = indexing_df.append(
         row, ignore_index=True, sort=False)
 
@@ -53,6 +61,7 @@ def indexing_frame(df):
 
 if __name__ == "__main__":
     df = indexing_frame(pd.read_csv(TEST_CSV_PATH))
+    print(df[30:50])
     # print(df[df["frame"] > 32000])
     # print(df["inning"].value_counts())
     point = define_highlight(df)

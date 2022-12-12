@@ -42,14 +42,14 @@ def main():
             clips.append(trim_video(MOVIE_FILE, frame-450, frame))
             clip_frames.append(frame)
             total_time += 15
-        # elif row.point >= 5: # homerun
-        #     clips.append(trim_video(MOVIE_FILE, frame-750, frame))
-        #     clip_frames.append(frame)
-        #     total_time += 25
-        else: # other
-            clips.append(trim_video(MOVIE_FILE, frame-600, frame))
+        elif row.point >= 4: # homerun
+            clips.append(trim_video(MOVIE_FILE, frame-750, frame-150))
             clip_frames.append(frame)
             total_time += 20
+        else: # other
+            clips.append(trim_video(MOVIE_FILE, frame-600, frame-150))
+            clip_frames.append(frame)
+            total_time += 15
     clip_frame_index = np.argsort(clip_frames)
     sort_clips = [clips[i] for i in clip_frame_index]
     concat_movie(sort_clips, DST_FILENAME)
