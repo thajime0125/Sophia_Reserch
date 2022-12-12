@@ -1,9 +1,12 @@
 import os
 
 import pandas as pd
+import numpy as np
 import cv2
 
-from telop_recognition.telop_reading import *
+from telop_recognition.utils import telop_recognition
+from define_highlight.utils import define_highlight, indexing_frame
+from preprocessing.trim_video import trim_video, concat_movie
 
 FILE_DIR = "data/scores/"
 MOVIE_FILE = "data/kochi_gameonly.mp4"
@@ -14,50 +17,42 @@ TELOP_POSITION = {
     "height": 90
 }
 SAMPLE_TELOP_FILE = "data/score.jpg"
-
-
-def telop_recognition():
-    # Read movie file
-    movie = cv2.VideoCapture(MOVIE_FILE)
-    telop_tar = cv2.imread(SAMPLE_TELOP_FILE)
-    telop_info = []
-    total_frame = int(movie.get(cv2.CAP_PROP_FRAME_COUNT))
-    i = 0
-    while True:
-        try:
-            ret, frame = movie.read()
-            if i % 30 == 0:
-                telop = frame[
-                    TELOP_POSITION["y"]:TELOP_POSITION["y"] + TELOP_POSITION["height"], 
-                    TELOP_POSITION["x"]:TELOP_POSITION["x"] + TELOP_POSITION["width"]
-                    ]
-                telop_diff = cv2.absdiff(telop, telop_tar)
-                if telop_diff.mean() < 30:
-                    count = reading_count(telop)
-                    base = reading_base(telop)
-                    score = reading_score(telop)
-                    inning = reading_inning(telop)
-                    telop_info.append([i, inning, base, count, score])
-        except:
-            pass
-                
-        i += 1
-        if i == total_frame:
-                break
-        if i % 1000 == 0:
-            print(i)
-
-    telop_info = pd.DataFrame(telop_info, columns=["frame", "inning", "base", "count", "score"])
-
-    return telop_info
-
-
-# def highlight_detection(telop_info):
+TELOP_INFO_FILE = "data/telop_info.csv"
+MAX_VIDEO_TIME = 2 * 60
+DST_FILENAME = "data/highlight.mp4"
 
 
 def main():
-    telop_info = telop_recognition()
-    telop_info.to_csv("data/telop_info.csv", index=False)
+    # telop_info = telop_recognition(MOVIE_FILE)
+    # telop_info.to_csv(TELOP_INFO_FILE, index=False)
+    telop_info = pd.read_csv(TELOP_INFO_FILE)
+    telop_info = indexing_frame(telop_info)
+    highlight_frame = define_highlight(telop_info)
+
+    # make clips
+    clips = []
+    clip_frames = []
+    total_time = 0
+    for index, row in highlight_frame.iterrows():
+        print(total_time)
+        if total_time > MAX_VIDEO_TIME:
+            break
+        frame = row.frame
+        if row.point >= 10: # end of game
+            clips.append(trim_video(MOVIE_FILE, frame-450, frame))
+            clip_frames.append(frame)
+            total_time += 15
+        # elif row.point >= 5: # homerun
+        #     clips.append(trim_video(MOVIE_FILE, frame-750, frame))
+        #     clip_frames.append(frame)
+        #     total_time += 25
+        else: # other
+            clips.append(trim_video(MOVIE_FILE, frame-600, frame))
+            clip_frames.append(frame)
+            total_time += 20
+    clip_frame_index = np.argsort(clip_frames)
+    sort_clips = [clips[i] for i in clip_frame_index]
+    concat_movie(sort_clips, DST_FILENAME)
 
 if __name__ == '__main__':
     main()

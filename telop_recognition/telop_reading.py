@@ -3,6 +3,8 @@ import re
 
 import cv2
 import pytesseract
+import pyocr
+from PIL import Image
 
 filedir = "data/scores/"
 
@@ -24,7 +26,11 @@ def is_positive_base(img):
 
 def number_recognition(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    num = pytesseract.image_to_string(img_gray, config='--psm 10')
+    pil_image = Image.fromarray(img_gray)
+    tools = pyocr.get_available_tools()
+    tool = tools[0]
+    builder = pyocr.builders.TextBuilder(tesseract_layout=10)
+    num = tool.image_to_string(pil_image, builder=builder)
     num = re.sub(r"[^0-9]", "", num)
     return int(num)
 
@@ -108,7 +114,7 @@ def reading_inning(img):
 
 
 if __name__ == '__main__':
-    n = 239460
+    n = 78900
     filepath = f'{filedir}score{n}.jpg'
     img = cv2.imread(filepath)
     
