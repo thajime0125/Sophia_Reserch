@@ -12,6 +12,8 @@ def define_highlight(df):
     now_score = df.iloc[0]["score"]
     now_base = df.iloc[0]["base"]
     for index, row in df.iterrows():
+        if index == 46:
+            continue
 
         # define get point scene
         if now_score != row["score"]:
@@ -61,7 +63,7 @@ def indexing_frame(df):
 
 if __name__ == "__main__":
     df = indexing_frame(pd.read_csv(TEST_CSV_PATH))
-    print(df[30:50])
+    # print(df[30:50])
     # print(df[df["frame"] > 32000])
     # print(df["inning"].value_counts())
     point = define_highlight(df)
