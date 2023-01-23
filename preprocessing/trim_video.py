@@ -1,10 +1,10 @@
 import moviepy.editor as mp
 
 
-def trim_video(src_filename, start_frame, end_frame):
+def trim_video(src_filename, start_frame, clip_time, video_fps):
 
-    start_time = start_frame // 30
-    end_time = end_frame // 30
+    start_time = start_frame // video_fps
+    end_time = start_time + clip_time
     trim_clip = mp.VideoFileClip(src_filename).subclip(start_time, end_time)
     # final_clip.write_videofile(
     #     dst_filename,

@@ -13,26 +13,35 @@ TELOP_POSITION = {
     "width": 320,
     "height": 90
 }
+TELOP_POSITION_VER2 = {
+    "x": 980,
+    "y": 5,
+    "width": 295,
+    "height": 85
+}
 SAMPLE_TELOP_FILE = "data/score.jpg"
 
 
-def telop_recognition(movie_file):
+def telop_recognition(movie_file, telop_position_ver=1):
     # Read movie file
     movie = cv2.VideoCapture(movie_file)
     telop_tar = cv2.imread(SAMPLE_TELOP_FILE)
     telop_info = []
     total_frame = int(movie.get(cv2.CAP_PROP_FRAME_COUNT))
+    telop_position = TELOP_POSITION if telop_position_ver == 1 else TELOP_POSITION_VER2
     i = 0
     while True:
         try:
             ret, frame = movie.read()
             if i % 30 == 0:
                 telop = frame[
-                    TELOP_POSITION["y"]:TELOP_POSITION["y"] + TELOP_POSITION["height"],
-                    TELOP_POSITION["x"]:TELOP_POSITION["x"] + TELOP_POSITION["width"]
+                    telop_position["y"]:telop_position["y"] + telop_position["height"],
+                    telop_position["x"]:telop_position["x"] + telop_position["width"]
                 ]
+                telop = cv2.resize(telop, (telop_tar.shape[1], telop_tar.shape[0]))
                 telop_diff = cv2.absdiff(telop, telop_tar)
-                if telop_diff.mean() < 30:
+                # print(telop_diff.mean())
+                if telop_diff.mean() < 35:
                     count = reading_count(telop)
                     base = reading_base(telop)
                     # score = reading_score(telop)
